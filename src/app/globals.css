@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+/* Dark mode follows the `.dark` class that next-themes puts on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Theme tokens. Components use these names only,
+ * never raw hex values. Every text color passes WCAG AA on --bg and
+ * --surface in both themes (checked 2026-10-01).
+ */
+:root {
+  --bg: #f7f6fb;
+  --surface: #ffffff;
+  --surface-2: #efedf7;
+  --border: rgb(20 16 40 / 0.1);
+  --border-strong: rgb(124 58 237 / 0.3);
+  --text: #14121c;
+  --text-muted: #4b4760;
+  --text-dim: #625d78;
+  --primary: #7c3aed;
+  --primary-text: #6d28d9;
+  --primary-solid: #7c3aed;
+  --accent: #be123c;
+  --accent-text: #be123c;
+  --info: #0e7490;
+  --glow: rgb(124 58 237 / 0.18);
+  --glow-accent: rgb(190 18 60 / 0.12);
+}
+
+.dark {
+  --bg: #0a0a0f;
+  --surface: #121019;
+  --surface-2: #181524;
+  --border: rgb(255 255 255 / 0.08);
+  --border-strong: rgb(139 92 246 / 0.35);
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #7c8799;
+  --primary: #8b5cf6;
+  --primary-text: #a78bfa;
+  /* White on #8b5cf6 is only 4.2:1, so filled buttons keep the deeper violet. */
+  --primary-solid: #7c3aed;
+  --accent: #e11d48;
+  --accent-text: #fb7185;
+  --info: #22d3ee;
+  --glow: rgb(139 92 246 / 0.35);
+  --glow-accent: rgb(225 29 72 / 0.25);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-dim: var(--text-dim);
+  --color-primary: var(--primary);
+  --color-primary-text: var(--primary-text);
+  --color-primary-solid: var(--primary-solid);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-info: var(--info);
+  --color-glow: var(--glow);
+  --color-glow-accent: var(--glow-accent);
+
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Obsidian Cybernetic corners: 4px chips/buttons, 8px cards, 12px hero cards. */
+  --radius-chip: 0.25rem;
+  --radius-card: 0.5rem;
+  --radius-feature: 0.75rem;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Smooth color cross-fade while the theme toggles (§7). The toggle adds
+   `.theme-transition` to <html> for a moment, then removes it. */
+html.theme-transition body,
+html.theme-transition body * {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 300ms;
+  transition-timing-function: ease;
+}
+
+::selection {
+  background: var(--glow);
+}
+
+/*
+ * Hero entrance (§7) — pure CSS so it starts on first paint, without waiting
+ * for JavaScript. Each element sets its own delay in `--d` (see hero.tsx).
+ */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-photo {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-rise,
+.hero-fade,
+.hero-photo {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-delay: var(--d, 0s);
+}
+
+.hero-rise {
+  animation-name: hero-rise;
+  animation-duration: 0.7s;
+}
+
+.hero-fade {
+  animation-name: hero-fade;
+  animation-duration: 0.6s;
+}
+
+.hero-photo {
+  animation-name: hero-photo;
+  animation-duration: 0.9s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .hero-fade,
+  .hero-photo {
+    animation: none;
+  }
+}
+
+/* Hero ambient glow: two blurred orbs drifting slowly (§5.2, §7). */
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, 8%, 0) scale(1.1);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-8%, -6%, 0) scale(1.05);
+  }
+}
+
+.orb-a {
+  animation: drift-a 18s ease-in-out infinite;
+}
+
+.orb-b {
+  animation: drift-b 22s ease-in-out infinite;
+}
+
+/*
+ * Page transitions (React <ViewTransition>, see Next.js view-transitions guide).
+ * .morph  — project card image grows into the case-study header and back.
+ * .nav-forward / .nav-back — directional slide between home and case studies.
+ */
+::view-transition-group(.morph) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+
+@keyframes via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+/* Reduced motion: pages swap instantly — no sliding or morphing. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Pulse travelling down the architecture connectors (case studies). */
+@keyframes pulse-down {
+  from {
+    top: -0.75rem;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+/* Certificate viewer opening animation. */
+@keyframes cert-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-a,
+  .orb-b {
+    animation: none;
+  }
+
+  dialog[open] {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transition body,
+  html.theme-transition body * {
+    transition-duration: 0ms;
+  }
+}

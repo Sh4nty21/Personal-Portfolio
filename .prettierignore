@@ -1,0 +1,9 @@
+.next
+node_modules
+pnpm-lock.yaml
+Pictures
+Certifications
+Resume
+Project Design
+test-results
+playwright-report
